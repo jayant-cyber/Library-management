@@ -24,6 +24,7 @@ class BOOK
 	double bookPrice;
 	int numberOfBookCopies;
 	int numberOfBookAvaliable;
+	void showBook(string str);
 
 public:
 	void addBook();
@@ -157,7 +158,6 @@ void MENU ::print(string str)
 }
 void MENU ::head(string str)
 {
-
 	string line(str.length() + 5, '-');
 	for (int i = 0; i < str.length(); i++)
 	{
@@ -179,6 +179,25 @@ void MENU ::last(string str)
 	cout << CENTER << str;
 }
 
+void BOOK ::showBook(string str)
+{
+	MENU o;
+	if (str.compare(bookCode) == 0)
+	{
+		o.print("Book code : ");
+		cout << bookCode;
+		o.print("Book Name : ");
+		cout << bookName;
+		o.print("Author Name : ");
+		cout << authorName;
+		o.print("Book price : ");
+		cout << bookPrice;
+		o.print("Number of copies : ");
+		cout << numberOfBookCopies;
+		o.print("Number of Book avaliable : ");
+		cout << numberOfBookAvaliable;
+	}
+}
 void BOOK ::addBook()
 {
 	MENU o;
@@ -192,4 +211,80 @@ void BOOK ::addBook()
 	cin >> authorName;
 	o.print("Number of copies : ");
 	cin >> numberOfBookCopies;
+}
+
+void BOOK ::allBook()
+{
+	MENU o;
+	o.head("ALL BOOKS");
+	for (int i = 0; i < 11; i++)
+	{
+		showBook(bookCode);
+	}
+}
+void BOOK ::editBook()
+{
+	MENU o;
+	o.head("Edit book");
+	o.listing(1, "BOOK CODE ");
+	o.listing(2, "BOOK NAME");
+	o.listing(3, "AUTHOR NAME");
+	o.listing(4, "BOOK PRICE");
+	o.listing(5, "NUMBER OF BOOK COPIES");
+	o.listing(6, "NUMBER OF BOOK AVALIABLE");
+
+	int option;
+	cin >> option;
+
+	switch (option)
+	{
+	case 1:
+		o.print("Book code : ");
+		cin >> bookCode;
+		break;
+	case 2:
+		o.print("Book Name : ");
+		cin >> bookName;
+		break;
+	case 3:
+		o.print("Author Name : ");
+		cin >> authorName;
+		break;
+	case 4:
+		o.print("Book price : ");
+		cin >> bookPrice;
+		break;
+	case 5:
+		o.print("Number of copies : ");
+		cin >> numberOfBookCopies;
+		break;
+	case 6:
+		o.print("Number of Book Avaliable : ");
+		cin >> numberOfBookAvaliable;
+		break;
+	case 7:
+		break;
+
+	default:
+		o.print("wrong Input");
+		editBook();
+		break;
+	}
+}
+
+void BOOK ::enqureBook()
+{
+	MENU o;
+	BOOK b;
+	string s;
+	o.head("Book enquire");
+	o.print("Enter bookCode : ");
+	cin >> s;
+	for (int i = 0; i < 11; i++)
+	{
+		if (s.compare(bookCode) == 0)
+		{
+			showBook(bookCode);
+		}
+	}
 }

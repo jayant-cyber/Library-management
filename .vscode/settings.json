@@ -4,6 +4,12 @@
         "regex": "cpp",
         "initializer_list": "cpp",
         "iostream": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "*.tcc": "cpp",
+        "bitset": "cpp",
+        "complex": "cpp",
+        "cstddef": "cpp",
+        "iomanip": "cpp",
+        "istream": "cpp"
     }
 }
