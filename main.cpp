@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 class menu
 {
 public:
@@ -21,41 +20,45 @@ public:
 		{
 			str[i] = toupper(str[i]);
 		}
-		cout << CENTER 
-		     << line
-		     << CENTER
-		     << str
-		     << CENTER
-		     << line;
+		cout << CENTER
+			 << line
+			 << CENTER
+			 << str
+			 << CENTER
+			 << line;
 	}
-	void list(int x, string str)
+	void listing(int x, string str)
 	{
 		cout << CENTER << x << "). " << str;
 	}
 	void last(string str)
 	{
-		cout << CENTER  << str;
+		cout << CENTER << str;
 	}
 };
+int selectableMenu()
+{
+	menu o;
+	o.head("WELCOME TO SIMPLE BOOKS LIBRARY SYSTEM");
+	o.listing(1, " Append Books to Books Master(B/b)");
+	o.listing(2, " Append Members to Members Master(M/m)");
+	o.listing(3, " Issue Book to a Member(I/i)");
+	o.listing(4, " Return Book from a Member(R/r)");
+	o.listing(5, " List Books in the System(L/l)");
+	o.listing(6, " List Members in the System(S/s)");
+	o.listing(7, " List Transactions in the System(T/t)");
+	o.listing(8, " Edit a Book/Member(E/e)");
+	o.listing(9, " Enquire a Book/Member/Transaction(N/n)");
+	o.listing(0, " Quit from this System(Q/q/Esc)");
+	o.last("Please Enter Your Choice(0..9/Char/Esc)");
+}
 
 int n;
 int main()
 {
-	menu o;
 	book b;
 	trans t;
-	o.head("WELCOME TO SIMPLE BOOKS LIBRARY SYSTEM");
-	o.list(1, " Append Books to Books Master(B/b)");
-	o.list(2, " Append Members to Members Master(M/m)");
-	o.list(3, " Issue Book to a Member(I/i)");
-	o.list(4, " Return Book from a Member(R/r)");
-	o.list(5, " List Books in the System(L/l)");
-	o.list(6, " List Members in the System(S/s)");
-	o.list(7, " List Transactions in the System(T/t)");
-	o.list(8, " Edit a Book/Member(E/e)");
-	o.list(9, " Enquire a Book/Member/Transaction(N/n)");
-	o.list(0, " Quit from this System(Q/q/Esc)");
-	o.last("Please Enter Your Choice(0..9/Char/Esc)");
+	selectableMenu();
 	cin >> n;
 	switch (n)
 	{
