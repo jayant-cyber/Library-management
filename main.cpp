@@ -1,33 +1,40 @@
 #include <bits/stdc++.h>
 #include <string>
+#include <cctype>
 #include "book.h"
 #include "member.h"
 #include "transaction.h"
+
+#define CENTER "\n\n\t\t\t\t\t"
+
 using namespace std;
+
 
 class menu
 {
 public:
 	void head(string str)
 	{
-		int lenghtOfString = str.size();
-		string line('-', lenghtOfString);
-		cout << "\n\n\t\t\t\t";
-		cout << line;
-		cout << "\n\n\t\t\t\t\t";
-		cout << str;
-		cout << "\n\n\t\t\t\t";
-		cout << line;
+
+		string line(str.length() + 5, '-');
+		for (int i = 0; i < str.length(); i++)
+		{
+			str[i] = toupper(str[i]);
+		}
+		cout << CENTER 
+		     << line
+		     << CENTER
+		     << str
+		     << CENTER
+		     << line;
 	}
-	void list(int x, char str1[100])
+	void list(int x, string str)
 	{
-		static int i = 15;
-		cout << "\n\t\t\t\t\t" << x << "). " << str1;
-		i++;
+		cout << CENTER << x << "). " << str;
 	}
-	void last(char k[100])
+	void last(string str)
 	{
-		cout << "\n\n\t\t\t\t\t" << k;
+		cout << CENTER  << str;
 	}
 };
 
