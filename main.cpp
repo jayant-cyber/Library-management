@@ -1,66 +1,84 @@
 #include <bits/stdc++.h>
 #include <string>
 #include <cctype>
-#include "book.h"
-#include "member.h"
-#include "transaction.h"
 
 #define CENTER "\n\n\t\t\t\t\t"
 
 using namespace std;
 
-class menu
+class MENU
 {
 public:
-	void head(string str)
-	{
-
-		string line(str.length() + 5, '-');
-		for (int i = 0; i < str.length(); i++)
-		{
-			str[i] = toupper(str[i]);
-		}
-		cout << CENTER
-			 << line
-			 << CENTER
-			 << str
-			 << CENTER
-			 << line;
-	}
-	void listing(int x, string str)
-	{
-		cout << CENTER << x << "). " << str;
-	}
-	void last(string str)
-	{
-		cout << CENTER << str;
-	}
+	void head(string str);
+	void listing(int x, string str);
+	void last(string str);
+	void print(string str);
 };
-int selectableMenu()
-{
-	menu o;
-	o.head("WELCOME TO SIMPLE BOOKS LIBRARY SYSTEM");
-	o.listing(1, " Append Books to Books Master(B/b)");
-	o.listing(2, " Append Members to Members Master(M/m)");
-	o.listing(3, " Issue Book to a Member(I/i)");
-	o.listing(4, " Return Book from a Member(R/r)");
-	o.listing(5, " List Books in the System(L/l)");
-	o.listing(6, " List Members in the System(S/s)");
-	o.listing(7, " List Transactions in the System(T/t)");
-	o.listing(8, " Edit a Book/Member(E/e)");
-	o.listing(9, " Enquire a Book/Member/Transaction(N/n)");
-	o.listing(0, " Quit from this System(Q/q/Esc)");
-	o.last("Please Enter Your Choice(0..9/Char/Esc)");
-}
 
-int n;
+class BOOK
+{
+	string memberCode[10];
+	string bookCode;
+	string bookName;
+	string authorName;
+	double bookPrice;
+	int numberOfBookCopies;
+	int numberOfBookAvaliable;
+
+public:
+	void addBook();
+	void allBook();
+	void editBook();
+	void enqureBook();
+};
+
+class Member
+{
+	string Member_Code;
+	string Member_Name;
+	string Member_Phone;
+	string Member_Address;
+	string bookcode[5];
+	int numberOfBookIssued;
+	int bookStartingTime[5], bookEndingTime[5];
+
+public:
+	void addMember();
+	void allMember();
+	void editMember();
+	void enqureMember();
+};
+
+class transaction
+{
+	char Transaction_Code[11];
+	char Transaction_Date[11];
+	char Transaction_Type[3];
+	char Member_Code[11];
+	char Book_Code[11];
+	char Copies[6];
+
+public:
+	void issueBook();
+	void returnBook();
+	void allTransaction();
+	void enqureTransaction();
+};
+void selectableMenu();
+void optionMenu(int option);
+
 int main()
 {
-	book b;
-	trans t;
+	int option;
 	selectableMenu();
-	cin >> n;
-	switch (n)
+	cin >> option;
+	optionMenu(option);
+	return 0;
+}
+
+void optionMenu(int option)
+{
+	switch (option)
 	{
 	case 1:
 	case 'B':
@@ -115,5 +133,63 @@ int main()
 		cout << "\n\t\t\t\t\t\t invalid responce\n\t\t\t\t\t\t Enter again";
 		break;
 	}
-	return 0;
+}
+void selectableMenu()
+{
+	MENU o;
+	o.head("WELCOME TO SIMPLE BOOKS LIBRARY SYSTEM");
+	o.listing(1, " Append Books to Books Master(B/b)");
+	o.listing(2, " Append Members to Members Master(M/m)");
+	o.listing(3, " Issue Book to a Member(I/i)");
+	o.listing(4, " Return Book from a Member(R/r)");
+	o.listing(5, " List Books in the System(L/l)");
+	o.listing(6, " List Members in the System(S/s)");
+	o.listing(7, " List Transactions in the System(T/t)");
+	o.listing(8, " Edit a Book/Member(E/e)");
+	o.listing(9, " Enquire a Book/Member/Transaction(N/n)");
+	o.listing(0, " Quit from this System(Q/q/Esc)");
+	o.last("Please Enter Your Choice(0..9/Char/Esc)");
+}
+
+void MENU ::print(string str)
+{
+	cout << CENTER << str;
+}
+void MENU ::head(string str)
+{
+
+	string line(str.length() + 5, '-');
+	for (int i = 0; i < str.length(); i++)
+	{
+		str[i] = toupper(str[i]);
+	}
+	cout << CENTER
+		 << line
+		 << CENTER
+		 << str
+		 << CENTER
+		 << line;
+}
+void MENU ::listing(int x, string str)
+{
+	cout << CENTER << x << "). " << str;
+}
+void MENU ::last(string str)
+{
+	cout << CENTER << str;
+}
+
+void BOOK ::addBook()
+{
+	MENU o;
+	o.print("Book code : ");
+	cin >> bookCode;
+	o.print("Book Name : ");
+	cin >> bookName;
+	o.print("Author Name : ");
+	cin >> authorName;
+	o.print("Book price : ");
+	cin >> authorName;
+	o.print("Number of copies : ");
+	cin >> numberOfBookCopies;
 }
