@@ -1,290 +1,407 @@
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <string>
-#include <cctype>
-
-#define CENTER "\n\n\t\t\t\t\t"
+#include <vector>
 
 using namespace std;
 
-class MENU
-{
-public:
-	void head(string str);
-	void listing(int x, string str);
-	void last(string str);
-	void print(string str);
-};
-
-class BOOK
-{
-	string memberCode[10];
-	string bookCode;
-	string bookName;
-	string authorName;
-	double bookPrice;
-	int numberOfBookCopies;
-	int numberOfBookAvaliable;
-	void showBook(string str);
+class Book {
+private:
+  int bookID;
+  string title;
+  string author;
+  bool isIssued;
 
 public:
-	void addBook();
-	void allBook();
-	void editBook();
-	void enqureBook();
+  Book(int id, string title, string author)
+      : bookID(id), title(title), author(author), isIssued(false) {}
+
+  int getBookID() { return bookID; }
+  string getTitle() { return title; }
+  string getAuthor() { return author; }
+  bool isBookIssued() { return isIssued; }
+  void setBookIssued(bool issued) { isIssued = issued; }
+  void setTitle(string newTitle) { title = newTitle; }
+  void setAuthor(string newAuthor) { author = newAuthor; }
 };
 
-class Member
-{
-	string Member_Code;
-	string Member_Name;
-	string Member_Phone;
-	string Member_Address;
-	string bookcode[5];
-	int numberOfBookIssued;
-	int bookStartingTime[5], bookEndingTime[5];
+class Student {
+private:
+  int studentID;
+  string name;
+  vector<int> issuedBooks;
 
 public:
-	void addMember();
-	void allMember();
-	void editMember();
-	void enqureMember();
+  Student(int id, string name) : studentID(id), name(name) {}
+  int getStudentID() { return studentID; }
+  string getName() { return name; }
+  vector<int> getIssuedBooks() { return issuedBooks; }
+  void addIssuedBook(int bookID) { issuedBooks.push_back(bookID); }
+  void returnBook(int bookID) {
+    issuedBooks.erase(remove(issuedBooks.begin(), issuedBooks.end(), bookID),
+                      issuedBooks.end());
+  }
+  void setName(string newName) { name = newName; }
 };
 
-class transaction
-{
-	char Transaction_Code[11];
-	char Transaction_Date[11];
-	char Transaction_Type[3];
-	char Member_Code[11];
-	char Book_Code[11];
-	char Copies[6];
+class Library {
+private:
+  vector<Book> books;
+  vector<Student> students;
+  string bookFileName;
+  string studentFileName;
 
 public:
-	void issueBook();
-	void returnBook();
-	void allTransaction();
-	void enqureTransaction();
+  Library(string bookFile, string studentFile)
+      : bookFileName(bookFile), studentFileName(studentFile) {
+    loadBooksFromFile();
+    loadStudentsFromFile();
+  }
+
+  ~Library() {
+    saveBooksToFile();
+    saveStudentsToFile();
+  }
+
+  bool bookIDExists(int bookID) {
+    for (auto &book : books) {
+      if (book.getBookID() == bookID) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool studentIDExists(int studentID) {
+    for (auto &student : students) {
+      if (student.getStudentID() == studentID) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void addBook(Book book) {
+    if (bookIDExists(book.getBookID())) {
+      cout << "Book ID already exists. Cannot add book." << endl;
+      return;
+    }
+    books.push_back(book);
+    saveBooksToFile();
+  }
+
+  void addStudent(Student student) {
+    if (studentIDExists(student.getStudentID())) {
+      cout << "Student ID already exists. Cannot add student." << endl;
+      return;
+    }
+    students.push_back(student);
+    saveStudentsToFile();
+  }
+
+  Book *findBookByID(int bookID) {
+    for (auto &book : books) {
+      if (book.getBookID() == bookID) {
+        return &book;
+      }
+    }
+    return nullptr;
+  }
+
+  Student *findStudentByID(int studentID) {
+    for (auto &student : students) {
+      if (student.getStudentID() == studentID) {
+        return &student;
+      }
+    }
+    return nullptr;
+  }
+
+  void issueBook(int studentID, int bookID) {
+    Student *student = findStudentByID(studentID);
+    Book *book = findBookByID(bookID);
+
+    if (student && book && !book->isBookIssued()) {
+      student->addIssuedBook(bookID);
+      book->setBookIssued(true);
+      cout << "Book issued successfully." << endl;
+    } else {
+      cout << "Book not found or already issued." << endl;
+    }
+  }
+
+  void returnBook(int studentID, int bookID) {
+    Student *student = findStudentByID(studentID);
+    Book *book = findBookByID(bookID);
+
+    if (student && book && book->isBookIssued()) {
+      student->returnBook(bookID);
+      book->setBookIssued(false);
+      cout << "Book returned successfully." << endl;
+    } else {
+      cout << "Book not found or not issued." << endl;
+    }
+  }
+
+  void loadBooksFromFile() {
+    std::ifstream file(bookFileName);
+    if (file.is_open()) {
+      int id;
+      std::string title;
+      std::string author;
+
+      while (file >> id) {
+        file.ignore();                  // Ignore the whitespace after the ID
+        std::getline(file, title, ';'); // Read until the semicolon delimiter
+        std::getline(file, author);     // Read until the end of the line
+        books.push_back(Book(id, title, author));
+      }
+      file.close();
+    } else {
+      std::cerr << "Unable to open books file." << std::endl;
+    }
+  }
+
+  void loadStudentsFromFile() {
+    std::ifstream file(studentFileName);
+    if (file.is_open()) {
+      int id;
+      std::string name;
+
+      while (file >> id) {
+        file.ignore();            // Ignore the whitespace after the ID
+        std::getline(file, name); // Read until the end of the line
+        students.push_back(Student(id, name));
+      }
+      file.close();
+    } else {
+      std::cerr << "Unable to open students file." << std::endl;
+    }
+  }
+
+  void saveBooksToFile() {
+    std::ofstream file(bookFileName);
+    if (file.is_open()) {
+      for (auto &book : books) {
+        file << book.getBookID() << " " << book.getTitle() << ";"
+             << book.getAuthor() << "\n";
+      }
+      file.close();
+    } else {
+      std::cerr << "Unable to open books file for writing." << std::endl;
+    }
+  }
+
+  void saveStudentsToFile() {
+    std::ofstream file(studentFileName);
+    if (file.is_open()) {
+      for (auto &student : students) {
+        file << student.getStudentID() << " " << student.getName() << "\n";
+      }
+      file.close();
+    } else {
+      std::cerr << "Unable to open students file for writing." << std::endl;
+    }
+  }
+
+  void displayBooks() {
+    const int idWidth = 10;
+    const int titleWidth = 30;
+    const int authorWidth = 30;
+    const int issuedWidth = 10;
+
+    std::cout << std::left << std::setw(idWidth) << "ID"
+              << std::setw(titleWidth) << "Title" << std::setw(authorWidth)
+              << "Author" << std::setw(issuedWidth) << "Issued"
+              << "\n";
+    std::cout << std::string(idWidth + titleWidth + authorWidth + issuedWidth,
+                             '-')
+              << "\n";
+
+    for (auto &book : books) {
+      std::string title = book.getTitle();
+      if (title.length() > titleWidth - 1)
+        title = title.substr(0, titleWidth - 4) + "...";
+
+      std::string author = book.getAuthor();
+      if (author.length() > authorWidth - 1)
+        author = author.substr(0, authorWidth - 4) + "...";
+
+      std::cout << std::left << std::setw(idWidth) << book.getBookID()
+                << std::setw(titleWidth) << title << std::setw(authorWidth)
+                << author << std::setw(issuedWidth)
+                << (book.isBookIssued() ? "Yes" : "No") << "\n";
+    }
+  }
+
+  void displayStudents() {
+    const int idWidth = 10;
+    const int nameWidth = 30;
+    const int issuedBooksWidth = 30;
+
+    std::cout << std::left << std::setw(idWidth) << "ID" << std::setw(nameWidth)
+              << "Name" << std::setw(issuedBooksWidth) << "Issued Books"
+              << "\n";
+    std::cout << std::string(idWidth + nameWidth + issuedBooksWidth, '-')
+              << "\n";
+
+    for (auto &student : students) {
+      std::string name = student.getName();
+      if (name.length() > nameWidth - 1)
+        name = name.substr(0, nameWidth - 4) + "...";
+
+      std::vector<int> issuedBooks = student.getIssuedBooks();
+      std::ostringstream oss;
+      for (size_t i = 0; i < issuedBooks.size(); ++i) {
+        oss << issuedBooks[i];
+        if (i != issuedBooks.size() - 1) {
+          oss << ", ";
+        }
+      }
+      std::string issuedBooksStr = oss.str();
+      if (issuedBooksStr.length() > issuedBooksWidth - 1)
+        issuedBooksStr = issuedBooksStr.substr(0, issuedBooksWidth - 4) + "...";
+
+      std::cout << std::left << std::setw(idWidth) << student.getStudentID()
+                << std::setw(nameWidth) << name << std::setw(issuedBooksWidth)
+                << issuedBooksStr << "\n";
+    }
+  }
+
+  void editBook(int bookID) {
+    Book *book = findBookByID(bookID);
+    if (book) {
+      string newTitle, newAuthor;
+      cout << "Enter new title: ";
+      cin.ignore();
+      getline(cin, newTitle);
+      cout << "Enter new author: ";
+      getline(cin, newAuthor);
+      book->setTitle(newTitle);
+      book->setAuthor(newAuthor);
+      saveBooksToFile();
+      cout << "Book edited successfully." << endl;
+    } else {
+      cout << "Book not found." << endl;
+    }
+  }
+  void editStudent(int studentID) {
+    Student *student = findStudentByID(studentID);
+    if (student) {
+      string newName;
+      cout << "Enter new name: ";
+      cin.ignore();
+      getline(cin, newName);
+      student->setName(newName);
+      saveStudentsToFile();
+      cout << "Student edited successfully." << endl;
+    } else {
+      cout << "Student not found." << endl;
+    }
+  }
 };
-void selectableMenu();
-void optionMenu(int option);
 
-int main()
-{
-	int option;
-	selectableMenu();
-	cin >> option;
-	optionMenu(option);
-	return 0;
-}
-
-void optionMenu(int option)
-{
-	switch (option)
-	{
-	case 1:
-	case 'B':
-	case 'b':
-		cout << "b1";
-		break;
-	case 2:
-	case 'M':
-	case 'm':
-		cout << "b2";
-		break;
-	case 3:
-	case 'I':
-	case 'i':
-		cout << "b3";
-		break;
-	case 4:
-	case 'R':
-	case 'r':
-		cout << "b4";
-		break;
-	case 5:
-	case 'L':
-	case 'l':
-		cout << "b5";
-		break;
-	case 6:
-	case 's':
-	case 'S':
-		cout << "b6";
-		break;
-	case 7:
-	case 'T':
-	case 't':
-		cout << "b7";
-		break;
-	case 8:
-	case 'E':
-	case 'e':
-		cout << "b8e";
-		break;
-	case 9:
-	case 'N':
-	case 'n':
-		cout << "b9";
-		break;
-	case 0:
-	case 'Q':
-	case 'q':
-		break;
-	default:
-		cout << "\n\t\t\t\t\t\t invalid responce\n\t\t\t\t\t\t Enter again";
-		break;
-	}
-}
-void selectableMenu()
-{
-	MENU o;
-	o.head("WELCOME TO SIMPLE BOOKS LIBRARY SYSTEM");
-	o.listing(1, " Append Books to Books Master(B/b)");
-	o.listing(2, " Append Members to Members Master(M/m)");
-	o.listing(3, " Issue Book to a Member(I/i)");
-	o.listing(4, " Return Book from a Member(R/r)");
-	o.listing(5, " List Books in the System(L/l)");
-	o.listing(6, " List Members in the System(S/s)");
-	o.listing(7, " List Transactions in the System(T/t)");
-	o.listing(8, " Edit a Book/Member(E/e)");
-	o.listing(9, " Enquire a Book/Member/Transaction(N/n)");
-	o.listing(0, " Quit from this System(Q/q/Esc)");
-	o.last("Please Enter Your Choice(0..9/Char/Esc)");
+void displayMenu() {
+  cout << "\nLibrary Management System\n";
+  cout << "1. Add Book\n";
+  cout << "2. Add Student\n";
+  cout << "3. Issue Book\n";
+  cout << "4. Return Book\n";
+  cout << "5. Display All Books\n";
+  cout << "6. Display All Students\n";
+  cout << "7. Edit Book\n";
+  cout << "8. Edit Student\n";
+  cout << "0. Exit\n";
+  cout << "Enter your choice: ";
 }
 
-void MENU ::print(string str)
-{
-	cout << CENTER << str;
-}
-void MENU ::head(string str)
-{
-	string line(str.length() + 5, '-');
-	for (int i = 0; i < str.length(); i++)
-	{
-		str[i] = toupper(str[i]);
-	}
-	cout << CENTER
-		 << line
-		 << CENTER
-		 << str
-		 << CENTER
-		 << line;
-}
-void MENU ::listing(int x, string str)
-{
-	cout << CENTER << x << "). " << str;
-}
-void MENU ::last(string str)
-{
-	cout << CENTER << str;
-}
+int main() {
+  Library library("books.txt", "students.txt");
+  int choice;
 
-void BOOK ::showBook(string str)
-{
-	MENU o;
-	if (str.compare(bookCode) == 0)
-	{
-		o.print("Book code : ");
-		cout << bookCode;
-		o.print("Book Name : ");
-		cout << bookName;
-		o.print("Author Name : ");
-		cout << authorName;
-		o.print("Book price : ");
-		cout << bookPrice;
-		o.print("Number of copies : ");
-		cout << numberOfBookCopies;
-		o.print("Number of Book avaliable : ");
-		cout << numberOfBookAvaliable;
-	}
-}
-void BOOK ::addBook()
-{
-	MENU o;
-	o.print("Book code : ");
-	cin >> bookCode;
-	o.print("Book Name : ");
-	cin >> bookName;
-	o.print("Author Name : ");
-	cin >> authorName;
-	o.print("Book price : ");
-	cin >> authorName;
-	o.print("Number of copies : ");
-	cin >> numberOfBookCopies;
-}
+  do {
+    displayMenu();
+    cin >> choice;
 
-void BOOK ::allBook()
-{
-	MENU o;
-	o.head("ALL BOOKS");
-	for (int i = 0; i < 11; i++)
-	{
-		showBook(bookCode);
-	}
-}
-void BOOK ::editBook()
-{
-	MENU o;
-	o.head("Edit book");
-	o.listing(1, "BOOK CODE ");
-	o.listing(2, "BOOK NAME");
-	o.listing(3, "AUTHOR NAME");
-	o.listing(4, "BOOK PRICE");
-	o.listing(5, "NUMBER OF BOOK COPIES");
-	o.listing(6, "NUMBER OF BOOK AVALIABLE");
+    switch (choice) {
+    case 1: {
+      int id;
+      string title, author;
+      cout << "Enter Book ID: ";
+      cin >> id;
+      cin.ignore();
+      cout << "Enter Book Title: ";
+      getline(cin, title);
+      cout << "Enter Book Author: ";
+      getline(cin, author);
+      library.addBook(Book(id, title, author));
+      break;
+    }
+    case 2: {
+      int id;
+      string name;
+      cout << "Enter Student ID: ";
+      cin >> id;
+      cin.ignore(); // to ignore the newline character left in the buffer
+      cout << "Enter Student Name: ";
+      getline(cin, name);
+      library.addStudent(Student(id, name));
+      break;
+    }
+    case 3: {
+      int studentID, bookID;
+      cout << "Enter Student ID: ";
+      cin >> studentID;
+      cout << "Enter Book ID: ";
+      cin >> bookID;
+      library.issueBook(studentID, bookID);
+      break;
+    }
+    case 4: {
+      int studentID, bookID;
+      cout << "Enter Student ID: ";
+      cin >> studentID;
+      cout << "Enter Book ID: ";
+      cin >> bookID;
+      library.returnBook(studentID, bookID);
+      break;
+    }
+    case 5: {
+      library.displayBooks();
+      break;
+    }
+    case 6: {
+      library.displayStudents();
+      break;
+    }
+    case 7: {
+      int bookID;
+      cout << "Enter Book ID to edit: ";
+      cin >> bookID;
+      library.editBook(bookID);
+      break;
+    }
+    case 8: {
+      int studentID;
+      cout << "Enter Student ID to edit: ";
+      cin >> studentID;
+      library.editStudent(studentID);
+      break;
+    }
+    case 0: {
+      cout << "Exiting...\n";
+      break;
+    }
+    default: {
+      cout << "Invalid choice! Please try again.\n";
+      break;
+    }
+    }
+  } while (choice != 0);
 
-	int option;
-	cin >> option;
-
-	switch (option)
-	{
-	case 1:
-		o.print("Book code : ");
-		cin >> bookCode;
-		break;
-	case 2:
-		o.print("Book Name : ");
-		cin >> bookName;
-		break;
-	case 3:
-		o.print("Author Name : ");
-		cin >> authorName;
-		break;
-	case 4:
-		o.print("Book price : ");
-		cin >> bookPrice;
-		break;
-	case 5:
-		o.print("Number of copies : ");
-		cin >> numberOfBookCopies;
-		break;
-	case 6:
-		o.print("Number of Book Avaliable : ");
-		cin >> numberOfBookAvaliable;
-		break;
-	case 7:
-		break;
-
-	default:
-		o.print("wrong Input");
-		editBook();
-		break;
-	}
-}
-
-void BOOK ::enqureBook()
-{
-	MENU o;
-	BOOK b;
-	string s;
-	o.head("Book enquire");
-	o.print("Enter bookCode : ");
-	cin >> s;
-	for (int i = 0; i < 11; i++)
-	{
-		if (s.compare(bookCode) == 0)
-		{
-			showBook(bookCode);
-		}
-	}
+  return 0;
 }
